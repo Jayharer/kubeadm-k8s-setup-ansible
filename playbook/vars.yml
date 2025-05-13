@@ -1,0 +1,7 @@
+apiserver_advertise_address: 10.0.0.130
+apiserver_public_ip: 3.239.236.10
+pod_network_cidr: 192.168.0.0/16
+home_dir: /home/ubuntu
+efs_id: fs-07e582cde719328ba 
+
+

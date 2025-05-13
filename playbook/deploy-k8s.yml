@@ -1,0 +1,17 @@
+- name: Deploy k8s app
+  hosts: master
+  remote_user: ubuntu
+  gather_facts: true
+
+  tasks:
+    - name: Clone a Git repo
+      ansible.builtin.git:
+        repo: https://github.com/Jayharer/k8s-devops.git
+        dest: /tmp/myrepo
+        version: main # or a specific branch/tag/commit
+        force: yes # overwrites existing content (optional)
+
+    - name: Deploy app
+      ansible.builtin.shell: |
+        kubectl apply -f /tmp/myrepo/k8s/mongo-deploy.yml
+        kubectl apply -f /tmp/myrepo/k8s/app-deploy.yml

@@ -1,0 +1,5 @@
+# kubeadm setup
+- import_playbook: install-kubeadm.yml
+- import_playbook: create-k8s-cluster.ym
+- import_playbook: join-worker-node.ym
+- import_playbook: create-ecr-secret.yml

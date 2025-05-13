@@ -1,0 +1,45 @@
+# Join worker EC2 ubuntu nodes
+- name: Join worker EC2 ubuntu nodes
+  hosts: worker
+  become: yes
+  remote_user: ubuntu
+  become_user: root
+  gather_facts: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Copy file kubeadm_init_output.txt at worker nodes
+      copy:
+        src: "./kubeadm_init_output.txt"
+        dest: /tmp/kubeadm_init_output.txt
+
+    - name: Extract kubeadm token using shell
+      shell: "grep 'kubeadm join' /tmp/kubeadm_init_output.txt | awk '{print $5}'"
+      register: kubeadm_token_output
+
+    - name: Set kubeadm_token fact
+      set_fact:
+        kubeadm_token: "{{ kubeadm_token_output.stdout }}"
+
+    - name: Show token
+      debug:
+        msg: "Token: {{ kubeadm_token }}"
+
+    - name: Extract kubeadm kubeadm ca hash using shell
+      shell: "cat /tmp/kubeadm_init_output.txt | tail -n 1 | awk '{print $2}'"
+      register: kubeadm_ca_hash_output
+
+    - name: Set kubeadm_ca_hash fact
+      set_fact:
+        kubeadm_ca_hash: "{{ kubeadm_ca_hash_output.stdout }}"
+
+    - name: Show kubeadm_ca_hash_output
+      debug:
+        msg: "CA hash: {{ kubeadm_ca_hash }}"
+
+    - name: Join worker node
+      ansible.builtin.shell: |
+        kubeadm join {{apiserver_advertise_address}}:6443 --token {{kubeadm_token}} \
+        --discovery-token-ca-cert-hash {{kubeadm_ca_hash}}

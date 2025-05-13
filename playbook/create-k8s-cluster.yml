@@ -1,0 +1,35 @@
+- name: Create K8s cluster using kubeadm on ubuntu EC2 machine
+  hosts: master
+  become: yes
+  remote_user: ubuntu
+  become_user: root
+  gather_facts: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Kubeadm init cluster
+      ansible.builtin.shell: |
+        kubeadm init \
+        --apiserver-advertise-address {{ apiserver_advertise_address }} \
+        --apiserver-cert-extra-sans {{ apiserver_public_ip }} \
+        --pod-network-cidr {{ pod_network_cidr }} \
+        --upload-certs
+      register: kubeadm_init_output
+
+    - name: Save output to file
+      copy:
+        content: "{{ kubeadm_init_output.stdout }}"
+        dest: "./kubeadm_init_output.txt"
+      delegate_to: localhost
+
+    - name: Copy kubeconfig at home directory
+      ansible.builtin.shell: |
+        mkdir -p {{ home_dir }}/.kube
+        cp -i /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
+        chown 1000:1000 {{ home_dir }}/.kube/config

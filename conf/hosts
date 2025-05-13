@@ -1,0 +1,9 @@
+[all]
+ubuntu@3.239.236.10
+ubuntu@3.230.126.200
+
+[master]
+ubuntu@3.239.236.10
+
+[worker]
+ubuntu@3.230.126.200
